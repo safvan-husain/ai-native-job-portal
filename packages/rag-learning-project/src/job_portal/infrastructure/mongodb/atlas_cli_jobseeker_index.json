@@ -1,0 +1,42 @@
+{
+  "name": "jobseeker_vector_index",
+  "type": "vectorSearch",
+  "definition": {
+    "fields": [
+      {
+        "type": "vector",
+        "path": "profile_embedding",
+        "numDimensions": 1024,
+        "similarity": "cosine"
+      },
+      {
+        "type": "filter",
+        "path": "years_of_experience"
+      },
+      {
+        "type": "filter",
+        "path": "skills"
+      },
+      {
+        "type": "filter",
+        "path": "desired_location"
+      },
+      {
+        "type": "filter",
+        "path": "desired_remote_policy"
+      },
+      {
+        "type": "filter",
+        "path": "education_level"
+      },
+      {
+        "type": "filter",
+        "path": "industries_of_interest"
+      },
+      {
+        "type": "filter",
+        "path": "status"
+      }
+    ]
+  }
+}
