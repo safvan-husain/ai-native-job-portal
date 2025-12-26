@@ -23,3 +23,15 @@ async def init_db():
     # Initialize beanie with the Candidate document class
     await init_beanie(database=client[db_name], document_models=[Candidate])
     print(f"Connected to MongoDB: {db_name}")
+
+async def get_unique_keywords():
+    """Retrieve all unique keywords from the candidates collection."""
+    try:
+        # Use simple distinct which was verified in check_db.py
+        keywords = await Candidate.distinct("keywords")
+        if keywords:
+            return sorted(keywords)
+        return []
+    except Exception as e:
+        print(f"DEBUG: Error in get_unique_keywords: {e}")
+        return []

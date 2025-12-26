@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+pydantic
+motor
+beanie
+python-dotenv
+langchain-ollama
+langchain-core
+langgraph
+requests
+dnspython
