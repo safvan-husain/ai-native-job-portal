@@ -1,7 +1,10 @@
 """Job seeker-specific vector store operations."""
+import logging
 from typing import List, Dict, Any, Optional
 
 from .base_vector_store import VectorStore
+
+logger = logging.getLogger(__name__)
 
 
 class JobSeekerStore(VectorStore):
@@ -129,11 +132,16 @@ class JobSeekerStore(VectorStore):
         if industry:
             filter_criteria["industries_of_interest"] = industry
         
+        final_filter = filter_criteria if len(filter_criteria) > 1 else None
+        logger.info(f"[DB_FILTER] search_matching_jobs - Built filter: {filter_criteria}")
+        logger.info(f"[DB_FILTER] search_matching_jobs - Applied filter: {final_filter}")
+        logger.info(f"[DB_FILTER] search_matching_jobs - Filter efficiency: {len(filter_criteria)} criteria applied")
+        
         return self.vector_search(
             query_vector=job_requirements_embedding,
             limit=limit,
             num_candidates=limit * 10,
-            filter_criteria=filter_criteria if len(filter_criteria) > 1 else None,
+            filter_criteria=final_filter,
             vector_field="profile_embedding"
         )
     
@@ -147,7 +155,11 @@ class JobSeekerStore(VectorStore):
         Returns:
             Profile document if found
         """
-        return self.collection.find_one({"user_id": user_id})
+        filter_query = {"user_id": user_id}
+        logger.info(f"[DB_FILTER] get_profile_by_user - Filter: {filter_query}")
+        result = self.collection.find_one(filter_query)
+        logger.info(f"[DB_FILTER] get_profile_by_user - Results: {'Found' if result else 'Not found'}")
+        return result
     
     def update_profile_status(self, profile_id: str, status: str) -> bool:
         """
@@ -209,4 +221,8 @@ class JobSeekerStore(VectorStore):
         if availability:
             filter_criteria["availability"] = availability
         
-        return list(self.collection.find(filter_criteria).limit(limit))
+        logger.info(f"[DB_FILTER] filter_by_metadata - Filter: {filter_criteria}")
+        logger.info(f"[DB_FILTER] filter_by_metadata - Filter efficiency: {len(filter_criteria)} criteria applied, limit: {limit}")
+        results = list(self.collection.find(filter_criteria).limit(limit))
+        logger.info(f"[DB_FILTER] filter_by_metadata - Results: {len(results)} profiles found")
+        return results

@@ -1,6 +1,9 @@
 """LangChain tools for companies."""
 import time
+import logging
 from langchain_core.tools import tool
+
+logger = logging.getLogger(__name__)
 
 try:
     from ...infrastructure.mongodb.connection import MongoDBConnection
@@ -94,12 +97,15 @@ def search_candidates(job_requirements: str, limit: int = 5) -> str:
         
         # Search for matching candidates
         jobseeker_store = _get_jobseeker_store()
+        logger.info(f"[DB_FILTER] search_candidates - Called with job_requirements: {job_requirements[:100]}..., limit: {limit}")
+        logger.info(f"[DB_FILTER] search_candidates - No explicit filter criteria provided (vector search only)")
         results = jobseeker_store.vector_search(
             query_vector=requirements_embedding,
             limit=limit,
             num_candidates=limit * 10,
             vector_field="profile_embedding"
         )
+        logger.info(f"[DB_FILTER] search_candidates - Results: {len(results)} candidates found")
         
         if not results:
             return "No matching candidates found. Try different requirements or broader search terms."

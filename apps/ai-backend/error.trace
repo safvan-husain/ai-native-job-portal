@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "D:\hashqubes\ai-native-job-portal\apps\ai-backend\main.py", line 39, in ai_filter_candidates
+    unique_keywords = await get_unique_keywords()
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\hashqubes\ai-native-job-portal\apps\ai-backend\database.py", line 37, in get_unique_keywords
+    result = await Candidate.aggregate(pipeline).to_list()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\hashqubes\ai-native-job-portal\apps\ai-backend\venv\Lib\site-packages\beanie\odm\queries\cursor.py", line 64, in to_list
+    cursor = await self.get_cursor()
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\hashqubes\ai-native-job-portal\apps\ai-backend\venv\Lib\site-packages\beanie\odm\queries\aggregation.py", line 100, in get_cursor
+    return await self.document_model.get_pymongo_collection().aggregate(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object AsyncIOMotorLatentCommandCursor can't be used in 'await' expression

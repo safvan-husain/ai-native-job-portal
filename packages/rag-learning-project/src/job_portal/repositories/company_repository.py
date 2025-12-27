@@ -1,7 +1,10 @@
 """Company-specific vector store operations."""
+import logging
 from typing import List, Dict, Any, Optional
 
 from .base_vector_store import VectorStore
+
+logger = logging.getLogger(__name__)
 
 
 class CompanyStore(VectorStore):
@@ -112,11 +115,16 @@ class CompanyStore(VectorStore):
         if experience_level:
             filter_criteria["experience_level"] = experience_level
         
+        final_filter = filter_criteria if len(filter_criteria) > 1 else None
+        logger.info(f"[DB_FILTER] search_matching_candidates - Built filter: {filter_criteria}")
+        logger.info(f"[DB_FILTER] search_matching_candidates - Applied filter: {final_filter}")
+        logger.info(f"[DB_FILTER] search_matching_candidates - Filter efficiency: {len(filter_criteria)} criteria applied")
+        
         return self.vector_search(
             query_vector=candidate_profile_embedding,
             limit=limit,
             num_candidates=limit * 10,
-            filter_criteria=filter_criteria if len(filter_criteria) > 1 else None,
+            filter_criteria=final_filter,
             vector_field="requirements_embedding"
         )
     
@@ -130,7 +138,11 @@ class CompanyStore(VectorStore):
         Returns:
             List of job postings
         """
-        return list(self.collection.find({"company_id": company_id}))
+        filter_query = {"company_id": company_id}
+        logger.info(f"[DB_FILTER] get_jobs_by_company - Filter: {filter_query}")
+        results = list(self.collection.find(filter_query))
+        logger.info(f"[DB_FILTER] get_jobs_by_company - Results: {len(results)} job postings found")
+        return results
     
     def update_job_status(self, job_id: str, status: str) -> bool:
         """
@@ -181,4 +193,8 @@ class CompanyStore(VectorStore):
         if salary_min:
             filter_criteria["salary_range.max"] = {"$gte": salary_min}
         
-        return list(self.collection.find(filter_criteria).limit(limit))
+        logger.info(f"[DB_FILTER] filter_by_metadata - Filter: {filter_criteria}")
+        logger.info(f"[DB_FILTER] filter_by_metadata - Filter efficiency: {len(filter_criteria)} criteria applied, limit: {limit}")
+        results = list(self.collection.find(filter_criteria).limit(limit))
+        logger.info(f"[DB_FILTER] filter_by_metadata - Results: {len(results)} job postings found")
+        return results

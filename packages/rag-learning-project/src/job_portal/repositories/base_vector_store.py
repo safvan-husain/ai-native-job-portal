@@ -1,6 +1,9 @@
 """Base vector store interface for MongoDB Atlas Vector Search."""
+import logging
 from typing import List, Dict, Any, Optional
 from pymongo.collection import Collection
+
+logger = logging.getLogger(__name__)
 
 
 class VectorStore:
@@ -84,8 +87,15 @@ class VectorStore:
         # Add filter if provided
         if filter_criteria:
             pipeline[0]["$vectorSearch"]["filter"] = filter_criteria
+            logger.info(f"[DB_FILTER] vector_search - Collection: {self.collection.name}, Filter: {filter_criteria}")
+            logger.info(f"[DB_FILTER] vector_search - Filter type: {type(filter_criteria)}, Filter keys: {list(filter_criteria.keys()) if isinstance(filter_criteria, dict) else 'N/A'}")
+        else:
+            logger.info(f"[DB_FILTER] vector_search - Collection: {self.collection.name}, No filter applied")
+        
+        logger.info(f"[DB_FILTER] vector_search - Query params: limit={limit}, num_candidates={num_candidates}, vector_field={vector_field}")
         
         results = list(self.collection.aggregate(pipeline))
+        logger.info(f"[DB_FILTER] vector_search - Results: {len(results)} documents found")
         return results
     
     def hybrid_search(
@@ -109,6 +119,8 @@ class VectorStore:
         Returns:
             List of matching documents with similarity scores
         """
+        logger.info(f"[DB_FILTER] hybrid_search - Collection: {self.collection.name}, Filter: {filter_criteria}")
+        logger.info(f"[DB_FILTER] hybrid_search - Filter type: {type(filter_criteria)}, Filter keys: {list(filter_criteria.keys()) if isinstance(filter_criteria, dict) else 'N/A'}")
         return self.vector_search(
             query_vector=query_vector,
             limit=limit,
@@ -172,4 +184,8 @@ class VectorStore:
         Returns:
             Number of matching documents
         """
-        return self.collection.count_documents(filter_criteria or {})
+        filter_to_use = filter_criteria or {}
+        logger.info(f"[DB_FILTER] count_documents - Collection: {self.collection.name}, Filter: {filter_to_use}")
+        result = self.collection.count_documents(filter_to_use)
+        logger.info(f"[DB_FILTER] count_documents - Results: {result} documents counted")
+        return result
